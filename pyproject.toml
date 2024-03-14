@@ -1,0 +1,45 @@
+[project]
+name = "adetailer-forge"
+description = "An object detection and auto-mask extension for stable diffusion webui forge."
+authors = [{ name = "Hina", email = "hinablue@gmail.com" }]
+requires-python = ">=3.8,<3.12"
+readme = "README.md"
+license = { text = "AGPL-3.0" }
+
+[project.urls]
+repository = "https://github.com/hinablue/adetailer-forge"
+
+[tool.isort]
+profile = "black"
+known_first_party = ["launch", "modules"]
+
+[tool.ruff.lint]
+select = [
+    "A",
+    "B",
+    "C4",
+    "C90",
+    "E",
+    "EM",
+    "F",
+    "FA",
+    "I001",
+    "ISC",
+    "N",
+    "PERF",
+    "PIE",
+    "PT",
+    "PTH",
+    "RET",
+    "RUF",
+    "SIM",
+    "UP",
+    "W",
+]
+ignore = ["B008", "B905", "E501", "F401"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["launch", "modules"]
+
+[tool.ruff.lint.pyupgrade]
+keep-runtime-typing = true

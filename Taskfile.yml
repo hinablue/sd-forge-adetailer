@@ -1,0 +1,27 @@
+# https://taskfile.dev
+
+version: "3"
+
+dotenv:
+  - .env
+
+tasks:
+  default:
+    cmds:
+      - echo "$PYTHON"
+      - echo "$WEBUI"
+    silent: true
+
+  launch:
+    dir: "{{.WEBUI}}"
+    cmds:
+      - "{{.PYTHON}} launch.py --xformers --api"
+    silent: true
+
+  lint:
+    cmds:
+      - pre-commit run -a
+
+  update:
+    cmds:
+      - "{{.PYTHON}} -m pip install -U ultralytics mediapipe ruff pre-commit black"
