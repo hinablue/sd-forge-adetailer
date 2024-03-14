@@ -41,6 +41,10 @@ class ArgsList(UserList):
     def names(self) -> tuple[str, ...]:
         return tuple(name for _, name in self)
 
+class PromptSR(NamedTuple):
+    s: str
+    r: str
+
 class ADetailerUnit:
     ad_enabled: bool = False
     ad_skip_img2img: bool = False

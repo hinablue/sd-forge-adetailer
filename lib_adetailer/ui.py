@@ -1,4 +1,5 @@
-from typing import List
+from typing import List, Any
+from functools import partial
 
 import os
 import cv2
@@ -6,12 +7,11 @@ import subprocess
 import re
 import gradio as gr
 
-from modules import shared, sd_models, shared_items, paths
+from modules import shared, sd_models, shared_items, paths, scripts
 from modules.launch_utils import git
 from modules.shared import cmd_opts
 from modules.processing import StableDiffusionProcessing, StableDiffusionProcessingImg2Img
-
-from modules.ui_components import FormRow, FormGroup, ToolButton, FormHTML, InputAccordion, ResizeHandleRow
+from modules.sd_samplers import all_samplers
 
 from lib_controlnet import external_code, global_state
 
@@ -24,6 +24,10 @@ from lib_adetailer import (
 )
 
 from lib_adetailer.args import ADetailerUnit, WebuiInfo
+from lib_adetailer.process import (
+    get_model_mapping,
+    get_controlnet_models
+)
 
 from .logger import logger_adetailer as logger
 
@@ -648,14 +652,116 @@ class ADetailerUiGroup(object):
 
         return unit
 
-    @staticmethod
-    def on_after_component(component, **_kwargs):
-        elem_id = getattr(component, "elem_id", None)
 
-        if elem_id == "txt2img_generate":
-            ADetailerUiGroup.txt2img_submit_button = component
-            return
+def on_after_component(component, **_kwargs):
+    elem_id = getattr(component, "elem_id", None)
 
-        if elem_id == "img2img_generate":
-            ADetailerUiGroup.img2img_submit_button = component
-            return
+    if elem_id == "txt2img_generate":
+        ADetailerUiGroup.txt2img_submit_button = component
+        return
+
+    if elem_id == "img2img_generate":
+        ADetailerUiGroup.img2img_submit_button = component
+        return
+
+# XYZ Plot
+
+def set_value(p, x: Any, xs: Any, *, field: str):
+    if not hasattr(p, "_ad_xyz"):
+        p._ad_xyz = {}
+    p._ad_xyz[field] = x
+
+def search_and_replace_prompt(p, x: Any, xs: Any, replace_in_main_prompt: bool):
+    if replace_in_main_prompt:
+        p.prompt = p.prompt.replace(xs[0], x)
+        p.negative_prompt = p.negative_prompt.replace(xs[0], x)
+
+    if not hasattr(p, "_ad_xyz_prompt_sr"):
+        p._ad_xyz_prompt_sr = []
+    p._ad_xyz_prompt_sr.append(PromptSR(s=xs[0], r=x))
+
+def make_axis_on_xyz_grid():
+    xyz_grid = None
+    for script in scripts.scripts_data:
+        if script.script_class.__module__ == "xyz_grid.py":
+            xyz_grid = script.module
+            break
+
+    if xyz_grid is None:
+        return
+
+    model_list = ["None", *get_model_mapping().keys()]
+    samplers = [sampler.name for sampler in all_samplers]
+
+    cn_models, _ = get_controlnet_models()
+
+    axis = [
+        xyz_grid.AxisOption(
+            "[ADetailer] Unit 1 model",
+            str,
+            partial(set_value, field="ad_model"),
+            choices=lambda: model_list,
+        ),
+        xyz_grid.AxisOption(
+            "[ADetailer] Unit 1 prompt",
+            str,
+            partial(set_value, field="ad_prompt"),
+        ),
+        xyz_grid.AxisOption(
+            "[ADetailer] Unit 1 negative prompt",
+            str,
+            partial(set_value, field="ad_negative_prompt"),
+        ),
+        xyz_grid.AxisOption(
+            "[ADetailer] Unit 1 Prompt S/R",
+            str,
+            partial(search_and_replace_prompt, replace_in_main_prompt=False),
+        ),
+        xyz_grid.AxisOption(
+            "[ADetailer] Unit 1 and Main Prompt, Prompt S/R",
+            str,
+            partial(search_and_replace_prompt, replace_in_main_prompt=True),
+        ),
+        xyz_grid.AxisOption(
+            "[ADetailer] Unit 1 Mask detection confidence threshold",
+            int,
+            partial(set_value, field="ad_detection_confidence_threshold"),
+        ),
+        xyz_grid.AxisOption(
+            "[ADetailer] Unit 1 Inpaint denoising strength",
+            float,
+            partial(set_value, field="ad_denoising_strength"),
+        ),
+        xyz_grid.AxisOption(
+            "[ADetailer] Unit 1 Inpaint only masked",
+            str,
+            partial(set_value, field="ad_inpaint_only_masked"),
+            choices=lambda: ["True", "False"],
+        ),
+        xyz_grid.AxisOption(
+            "[ADetailer] Unit 1 Inpaint only masked padding",
+            int,
+            partial(set_value, field="ad_inpaint_only_masked_padding"),
+        ),
+        xyz_grid.AxisOption(
+            "[ADetailer] Unit 1 sampler",
+            str,
+            partial(set_value, field="ad_sampler"),
+            choices=lambda: samplers,
+        ),
+        # xyz_grid.AxisOption(
+        #     "[ADetailer] Unit 1 ControlNet model",
+        #     str,
+        #     partial(set_value, field="ad_controlnet_model"),
+        #     choices=lambda: ["None", "Passthrough", cn_models],
+        # ),
+    ]
+
+    if not any(x.label.startswith("[ADetailer]") for x in xyz_grid.axis_options):
+        xyz_grid.axis_options.extend(axis)
+
+def on_before_ui():
+    try:
+        make_axis_on_xyz_grid()
+    except Exception as e:
+        logger.error(f"xyz_grid error:\n{e}")
