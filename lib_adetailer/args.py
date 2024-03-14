@@ -1,12 +1,7 @@
 from typing import Dict, Optional, Tuple, List, Union, Any, Literal, NamedTuple, Optional
 
-from collections import UserList
-from dataclasses import dataclass
 from functools import cached_property, partial
-
-import gradio as gr
-
-from modules.processing import StableDiffusionProcessing
+from collections import UserList
 
 from pydantic import (
     BaseModel,
@@ -19,33 +14,11 @@ from pydantic import (
     validator,
 )
 
-@dataclass
-class SkipImg2ImgOrig:
-    steps: int
-    sampler_name: str
-    width: int
-    height: int
+import gradio as gr
 
+from modules.processing import StableDiffusionProcessing
 
-class Arg(NamedTuple):
-    attr: str
-    name: str
-
-
-class ArgsList(UserList):
-    @cached_property
-    def attrs(self) -> tuple[str, ...]:
-        return tuple(attr for attr, _ in self)
-
-    @cached_property
-    def names(self) -> tuple[str, ...]:
-        return tuple(name for _, name in self)
-
-class PromptSR(NamedTuple):
-    s: str
-    r: str
-
-class ADetailerUnit:
+class ADetailerUnitSchema(BaseModel):
     ad_enabled: bool = False
     ad_skip_img2img: bool = False
     ad_model: str = "None"
@@ -87,7 +60,9 @@ class ADetailerUnit:
     ad_controlnet_guidance_start: confloat(ge=0.0, le=1.0) = 0
     ad_controlnet_guidance_end: confloat(ge=0.0, le=1.0) = 1.0
     ad_controlnet_weight: confloat(ge=0.0, le=1.0) = 1.0
+    is_api: bool = True
 
+class ADetailerUnit:
     def __init__(
         self,
         enabled=False,
@@ -320,6 +295,23 @@ class ADetailerUnit:
             "ad_controlnet_guidance_end",
             "ad_controlnet_weight"
         )
+
+class Arg(NamedTuple):
+    attr: str
+    name: str
+
+class ArgsList(UserList):
+    @cached_property
+    def attrs(self) -> tuple[str, ...]:
+        return tuple(attr for attr, _ in self)
+
+    @cached_property
+    def names(self) -> tuple[str, ...]:
+        return tuple(name for _, name in self)
+
+class PromptSR(NamedTuple):
+    s: str
+    r: str
 
 class WebuiInfo:
     ad_model_list: list[str]

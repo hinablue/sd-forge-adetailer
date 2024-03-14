@@ -17,7 +17,7 @@ from modules.processing import StableDiffusionProcessing
 
 from lib_adetailer.settings import on_ui_settings
 from lib_adetailer.infotext import Infotext
-from lib_adetailer.ui import ADetailerUiGroup, on_after_component, on_before_ui
+from lib_adetailer.ui import ADetailerUiGroup, on_after_component, on_before_ui, add_api_endpoints
 
 from lib_adetailer.logger import logger_adetailer as logger
 from lib_adetailer.args import ADetailerUnit
@@ -123,4 +123,5 @@ class ADetailerScript(scripts.Script):
 script_callbacks.on_ui_settings(on_ui_settings)
 script_callbacks.on_after_component(on_after_component)
 script_callbacks.on_infotext_pasted(Infotext.on_infotext_pasted)
+script_callbacks.on_app_started(add_api_endpoints)
 script_callbacks.on_before_ui(on_before_ui)

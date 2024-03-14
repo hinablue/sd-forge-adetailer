@@ -7,6 +7,8 @@ import subprocess
 import re
 import gradio as gr
 
+from fastapi import FastAPI
+
 from modules import shared, sd_models, shared_items, paths, scripts
 from modules.launch_utils import git
 from modules.shared import cmd_opts
@@ -23,7 +25,7 @@ from lib_adetailer import (
     ultralytics_predict,
 )
 
-from lib_adetailer.args import ADetailerUnit, WebuiInfo, PromptSR
+from lib_adetailer.args import ADetailerUnit, ADetailerUnitSchema, WebuiInfo, PromptSR
 from lib_adetailer.process import (
     get_model_mapping,
     get_controlnet_models
@@ -765,3 +767,16 @@ def on_before_ui():
         make_axis_on_xyz_grid()
     except Exception as e:
         logger.error(f"xyz_grid error:\n{e}")
+
+def add_api_endpoints(_: gr.Blocks, app: FastAPI):
+    @app.get("/adetailer/v1/version")
+    async def version():
+        return {"version": __version__}
+
+    @app.get("/adetailer/v1/schema")
+    async def schema():
+        return ADetailerUnitSchema.schema()
+
+    @app.get("/adetailer/v1/ad_model")
+    async def ad_model():
+        return {"ad_model": list(get_model_mapping().keys())}
