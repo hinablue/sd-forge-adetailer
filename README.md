@@ -8,8 +8,8 @@ Huge thanks for [Bing-su/adetailer](https://github.com/Bing-su/adetailer.git), c
 
 ## TODO
 
-- [x] XYZ Plot
-- [ ] API Support
+- [x] XYZ plot
+- [x] API output
 - [ ] Test for dynamic_prompting
 - [ ] Test for dynamic_thresholding
 - [ ] Test for wildcard_recursive
