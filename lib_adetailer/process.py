@@ -17,7 +17,7 @@ from torchvision.transforms.functional import to_pil_image
 
 from contextlib import contextmanager, suppress
 
-from modules import images, safe, shared, paths, scripts, sd_models, shared_items
+from modules import devices, images, safe, shared, paths, scripts, sd_models, shared_items
 from modules.shared import cmd_opts, opts, state
 from modules.sd_samplers import all_samplers
 
@@ -264,6 +264,10 @@ def afterdetailer_process_image(n: int, unit: ADetailerUnit, p, pp, *args):
     if processed is not None:
         pp.image = processed.images[0]
         state.assign_current_image(pp.image)
+
+        del(p2)
+        devices.torch_gc()
+
         return True
 
     return False

@@ -23,7 +23,7 @@ from lib_adetailer import (
     ultralytics_predict,
 )
 
-from lib_adetailer.args import ADetailerUnit, WebuiInfo
+from lib_adetailer.args import ADetailerUnit, WebuiInfo, PromptSR
 from lib_adetailer.process import (
     get_model_mapping,
     get_controlnet_models
