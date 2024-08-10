@@ -87,7 +87,7 @@ class ADetailerUiGroup(object):
         self.ad_controlnet_guidance_end = None
         self.ad_controlnet_weight = None
 
-    def gr_interactive(value: bool = True):
+    def gr_interactive(self, value: bool = True):
         return gr.update(interactive=value)
 
     def on_ad_model_update(self, model: str):
