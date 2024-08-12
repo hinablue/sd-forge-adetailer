@@ -41,11 +41,24 @@ def serialize_unit(unit: ADetailerUnit) -> str:
 
 
 def parse_unit(text: str) -> ADetailerUnit:
+    # Special action for prompt and negative prompt
+    (first_part, end_part) = text.split(', Ad Prompt:')
+    (prompt, end_part) = end_part.split(', Ad Negative Prompt:')
+    end_part = end_part.split(',')
+    negative_prompt = end_part[0]
+    end_part = ','.join(end_part[1:])
+
     return ADetailerUnit(
-        enabled=True,
+        prompt=prompt.strip(),
+        negative_prompt=negative_prompt.strip(),
         **{
             displaytext_to_field(key): parse_value(value)
-            for item in text.split(",")
+            for item in first_part.split(",")
+            for (key, value) in (item.strip().split(":"),)
+        },
+        **{
+            displaytext_to_field(key): parse_value(value)
+            for item in end_part.split(",")
             for (key, value) in (item.strip().split(":"),)
         },
     )
