@@ -50,6 +50,8 @@ class ADetailerUnitSchema(BaseModel):
     ad_vae: Optional[str] = None
     ad_use_separate_sampler: bool = False
     ad_sampler: str = "DPM++ 2M Karras"
+    ad_use_separate_scheduler: bool = False
+    ad_scheduler: str = "Normal"
     ad_use_separate_noise_multiplier: bool = False
     ad_noise_multiplier: confloat(ge=0.5, le=1.5) = 1.0
     ad_use_separate_clip_skip: bool = False
@@ -96,6 +98,8 @@ class ADetailerUnit:
         vae="None",
         use_separate_sampler=False,
         sampler="Eular",
+        use_separate_scheduler=False,
+        scheduler="Normal",
         use_separate_noise_multiplier=False,
         noise_multiplier=1,
         use_separate_clip_skip=False,
@@ -138,6 +142,8 @@ class ADetailerUnit:
         self.ad_vae = vae
         self.ad_use_separate_sampler = use_separate_sampler
         self.ad_sampler = sampler
+        self.ad_use_separate_scheduler = use_separate_scheduler
+        self.ad_scheduler = scheduler
         self.ad_use_separate_noise_multiplier = use_separate_noise_multiplier
         self.ad_noise_multiplier = noise_multiplier
         self.ad_use_separate_clip_skip = use_separate_clip_skip
@@ -193,6 +199,10 @@ class ADetailerUnit:
         ppop(
             "ADetailer use separate sampler",
             ["ADetailer use separate sampler", "ADetailer sampler"],
+        )
+        ppop(
+            "ADetailer use separate scheduler",
+            ["ADetailer use separate scheduler", "ADetailer scheduler"],
         )
         ppop(
             "ADetailer use separate noise multiplier",
@@ -284,6 +294,8 @@ class ADetailerUnit:
             "ad_vae",
             "ad_use_separate_sampler",
             "ad_sampler",
+            "ad_use_separate_scheduler",
+            "ad_scheduler",
             "ad_use_separate_noise_multiplier",
             "ad_noise_multiplier",
             "ad_use_separate_clip_skip",
@@ -316,6 +328,7 @@ class PromptSR(NamedTuple):
 class WebuiInfo:
     ad_model_list: list[str]
     sampler_names: list[str]
+    scheduler_names: list[str]
     t2i_button: gr.Button
     i2i_button: gr.Button
     checkpoints_list: list[str]
@@ -353,6 +366,8 @@ _all_args = [
     ("ad_vae", "ADetailer VAE"),
     ("ad_use_separate_sampler", "ADetailer use separate sampler"),
     ("ad_sampler", "ADetailer sampler"),
+    ("ad_use_separate_scheduler", "ADetailer use separate scheduler"),
+    ("ad_scheduler", "ADetailer scheduler"),
     ("ad_use_separate_noise_multiplier", "ADetailer use separate noise multiplier"),
     ("ad_noise_multiplier", "ADetailer noise multiplier"),
     ("ad_use_separate_clip_skip", "ADetailer use separate CLIP skip"),

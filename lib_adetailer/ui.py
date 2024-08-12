@@ -66,7 +66,7 @@ class ADetailerUiGroup(object):
         self.ad_use_separate_width_height = None
         self.ad_inpaint_width = None
         self.ad_inpaint_height = None
-        self.ad_use_separate_steps = None
+        self.ad_use_separate_steps = False
         self.ad_steps = None
         self.ad_use_separate_cfg_scale = False
         self.ad_cfg_scale = None
@@ -76,6 +76,8 @@ class ADetailerUiGroup(object):
         self.ad_vae = None
         self.ad_use_separate_sampler = False
         self.ad_sampler = None
+        self.ad_use_separate_scheduler = False
+        self.ad_scheduler = None
         self.ad_use_separate_noise_multiplier = False
         self.ad_noise_multiplier = None
         self.ad_use_separate_clip_skip = False
@@ -456,28 +458,52 @@ class ADetailerUiGroup(object):
                                 elem_id=f"{elemid_prefix}vae-{n}",
                             )
 
-                    with gr.Row(), gr.Column(variant="compact"):
-                        self.ad_use_separate_sampler = gr.Checkbox(
-                            label="Use separate sampler",
-                            value=self.default_unit.ad_use_separate_sampler,
-                            visible=True,
-                            elem_id=f"{elemid_prefix}use_separate_sampler-{n}",
-                        )
+                    with gr.Row():
+                        with gr.Column(variant="compact"):
+                            self.ad_use_separate_sampler = gr.Checkbox(
+                                label="Use separate sampler",
+                                value=self.default_unit.ad_use_separate_sampler,
+                                visible=True,
+                                elem_id=f"{elemid_prefix}use_separate_sampler-{n}",
+                            )
 
-                        self.ad_sampler = gr.Dropdown(
-                            label="ADetailer sampler",
-                            choices=webui_info.sampler_names,
-                            value=webui_info.sampler_names[0],
-                            visible=True,
-                            elem_id=f"{elemid_prefix}sampler-{n}",
-                        )
+                            self.ad_sampler = gr.Dropdown(
+                                label="ADetailer sampler",
+                                choices=webui_info.sampler_names,
+                                value=webui_info.sampler_names[0],
+                                visible=True,
+                                elem_id=f"{elemid_prefix}sampler-{n}",
+                            )
 
-                        self.ad_use_separate_sampler.change(
-                            self.gr_interactive,
-                            inputs=self.ad_use_separate_sampler,
-                            outputs=self.ad_sampler,
-                            queue=False,
-                        )
+                            self.ad_use_separate_sampler.change(
+                                self.gr_interactive,
+                                inputs=self.ad_use_separate_sampler,
+                                outputs=self.ad_sampler,
+                                queue=False,
+                            )
+
+                        with gr.Column(variant="compact"):
+                            self.ad_use_separate_scheduler = gr.Checkbox(
+                                label="Use separate scheduler",
+                                value=self.default_unit.ad_use_separate_scheduler,
+                                visible=True,
+                                elem_id=f"{elemid_prefix}use_separate_scheduler-{n}",
+                            )
+
+                            self.ad_scheduler = gr.Dropdown(
+                                label="ADetailer scheduler",
+                                choices=webui_info.scheduler_names,
+                                value=webui_info.scheduler_names[0],
+                                visible=True,
+                                elem_id=f"{elemid_prefix}scheduler-{n}",
+                            )
+
+                            self.ad_use_separate_scheduler.change(
+                                self.gr_interactive,
+                                inputs=self.ad_use_separate_scheduler,
+                                outputs=self.ad_scheduler,
+                                queue=False,
+                            )
 
                     with gr.Row():
                         with gr.Column(variant="compact"):
@@ -542,7 +568,7 @@ class ADetailerUiGroup(object):
                     with gr.Column(variant="compact"):
                         self.ad_controlnet_model = gr.Dropdown(
                             label="ControlNet model",
-                            choices=["None", *webui_info.controlnet_model_list],
+                            choices=["None", "Passthrough", *webui_info.controlnet_model_list],
                             value=self.default_unit.ad_controlnet_model,
                             visible=True,
                             type="value",
@@ -628,6 +654,8 @@ class ADetailerUiGroup(object):
             self.ad_vae,
             self.ad_use_separate_sampler,
             self.ad_sampler,
+            self.ad_use_separate_scheduler,
+            self.ad_scheduler,
             self.ad_use_separate_noise_multiplier,
             self.ad_noise_multiplier,
             self.ad_use_separate_clip_skip,

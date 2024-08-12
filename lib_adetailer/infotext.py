@@ -87,7 +87,6 @@ class Infotext(object):
         if p.extra_generation_params is not None:
             p.extra_generation_params["ADetailer"] = unit.get_dict(isinstance(p, StableDiffusionProcessingImg2Img))
 
-
     @staticmethod
     def write_params_txt(info: str):
         with open(os.path.join(data_path, "params.txt"), "w", encoding="utf8") as file:

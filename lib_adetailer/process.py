@@ -17,7 +17,7 @@ from torchvision.transforms.functional import to_pil_image
 
 from contextlib import contextmanager, suppress
 
-from modules import devices, images, safe, shared, paths, scripts, sd_models, shared_items
+from modules import devices, images, safe, shared, paths, scripts, sd_models, shared_items, sd_schedulers
 from modules.shared import cmd_opts, opts, state
 from modules.sd_samplers import all_samplers
 
@@ -129,6 +129,7 @@ def afterdetailer_process_image(n: int, unit: ADetailerUnit, p, pp, *args):
     seed, subseed = get_seed(p)
     width, height = get_width_height(p, unit)
     sampler_name = get_sampler(p, unit)
+    scheduler_name = get_scheduler(p, unit)
     steps = get_steps(p, unit)
     cfg_scale = get_cfg_scale(p, unit)
     override_settings = get_override_settings(p, unit)
@@ -144,6 +145,10 @@ def afterdetailer_process_image(n: int, unit: ADetailerUnit, p, pp, *args):
     inpaint_only_masked_padding = get_ad_xyz(p, 'ad_inpaint_only_masked_padding')
     if inpaint_only_masked_padding is None:
         inpaint_only_masked_padding = unit.ad_inpaint_only_masked_padding
+
+    # Remove Hires prompt and Hires negative prompt params for i2i
+    del p.extra_generation_params['Hires prompt']
+    del p.extra_generation_params['Hires negative prompt']
 
     i2i = StableDiffusionProcessingImg2Img(
         init_images=[pp.image],
@@ -168,6 +173,7 @@ def afterdetailer_process_image(n: int, unit: ADetailerUnit, p, pp, *args):
         seed_resize_from_h=p.seed_resize_from_h,
         seed_resize_from_w=p.seed_resize_from_w,
         sampler_name=sampler_name,
+        scheduler=scheduler_name,
         batch_size=1,
         n_iter=1,
         steps=steps,
@@ -176,15 +182,49 @@ def afterdetailer_process_image(n: int, unit: ADetailerUnit, p, pp, *args):
         height=height,
         restore_faces=unit.ad_use_restore_face_after_adetailer,
         tiling=p.tiling,
-        extra_generation_params=p.extra_generation_params,
+        extra_generation_params={},
         do_not_save_samples=True,
         do_not_save_grid=True,
         override_settings=override_settings,
     )
 
-    i2i.cached_c = [None, None]
-    i2i.cached_uc = [None, None]
+    i2i.cached_c = [None, None, None]
+    i2i.cached_uc = [None, None, None]
     i2i.scripts, i2i.script_args = script_filter(p, unit)
+
+    # Override parameters AGAIN.
+    i2i.denoising_strength = denoising_strength
+    i2i.mask = None
+    i2i.mask_blur = unit.ad_inpaint_mask_blur
+    i2i.inpainting_fill = 1
+    i2i.inpaint_full_res = inpaint_only_masked
+    i2i.inpaint_full_res_padding = inpaint_only_masked_padding
+    i2i.inpainting_mask_invert = 0
+    i2i.sd_model = p.sd_model
+    i2i.outpath_samples = p.outpath_samples
+    i2i.outpath_grids = p.outpath_grids
+    i2i.prompt = ""
+    i2i.negative_prompt = ""
+    i2i.styles = p.styles
+    i2i.seed = seed
+    i2i.subseed = subseed
+    i2i.subseed_strength = p.subseed_strength
+    i2i.seed_resize_from_h = p.seed_resize_from_h
+    i2i.seed_resize_from_w = p.seed_resize_from_w
+    i2i.sampler_name = sampler_name
+    i2i.scheduler = scheduler_name
+    i2i.batch_size = 1
+    i2i.n_iter = 1
+    i2i.steps = steps
+    i2i.cfg_scale = cfg_scale
+    i2i.width = width
+    i2i.height = height
+    i2i.restore_faces = unit.ad_use_restore_face_after_adetailer
+    i2i.tiling = p.tiling
+    i2i.extra_generation_params = {}
+    i2i.do_not_save_samples = True
+    i2i.do_not_save_grid = True
+    i2i.override_settings = override_settings
 
     # TODO: Clean up this, need more test.
     i2i.scripts.alwayson_scripts = []
@@ -199,6 +239,12 @@ def afterdetailer_process_image(n: int, unit: ADetailerUnit, p, pp, *args):
     #
     # i2i.script_args_value = script_args_value
     # del script_args_value
+
+    ad_prompts, ad_negatives = get_prompt(p, unit)
+
+    i2i.prompts = ad_prompts
+    i2i.negative_prompts = ad_negatives
+    i2i.setup_conds()
 
     if unit.ad_controlnet_model not in ["None", "Passthrough"]:
         image = np.asarray(pp.image)
@@ -232,8 +278,6 @@ def afterdetailer_process_image(n: int, unit: ADetailerUnit, p, pp, *args):
     elif unit.ad_controlnet_model == "None":
         i2i.control_net_enabled = False
 
-    ad_prompts, ad_negatives = get_prompt(p, unit)
-
     p2 = copy.copy(i2i)
 
     for j in range(faces):
@@ -246,6 +290,9 @@ def afterdetailer_process_image(n: int, unit: ADetailerUnit, p, pp, *args):
 
         p2.seed = get_each_tap_seed(seed, j)
         p2.subseed = get_each_tap_seed(subseed, j)
+        p2.prompts = [p2.prompt]
+        p2.negative_prompts = [p2.negative_prompt]
+        p2.setup_conds()
 
         try:
             processed = process_images(p2)
@@ -467,6 +514,13 @@ def get_sampler(p, unit: ADetailerUnit) -> str:
         return unit.ad_sampler
     return p.sampler_name
 
+def get_scheduler(p, unit: ADetailerUnit) -> str:
+    if hasattr(p, "_ad_xyz") and "ad_scheduler" in p._ad_xyz.keys():
+        return p._ad_xyz.get('ad_scheduler')
+    if unit.ad_use_separate_scheduler:
+        return unit.ad_scheduler
+    return p.scheduler
+
 def get_ad_xyz(p, key: str):
     if hasattr(p, "_ad_xyz") and key in p._ad_xyz.keys():
         return p._ad_xyz.get(key)
@@ -606,6 +660,7 @@ def get_webui_info():
 
     ad_model_list = list(model_mapping.keys())
     sampler_names = [sampler.name for sampler in all_samplers]
+    scheduler_names = [scheduler.name for scheduler in sd_schedulers.schedulers]
 
     controlnet_model_list, preprocessors_list = get_controlnet_models()
 
@@ -619,6 +674,7 @@ def get_webui_info():
     webui_info = WebuiInfo()
     webui_info.ad_model_list = ad_model_list
     webui_info.sampler_names = sampler_names
+    webui_info.scheduler_names = scheduler_names
     webui_info.t2i_button = None
     webui_info.i2i_button = None
     webui_info.checkpoints_list = checkpoint_list
