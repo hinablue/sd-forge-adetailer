@@ -147,8 +147,10 @@ def afterdetailer_process_image(n: int, unit: ADetailerUnit, p, pp, *args):
         inpaint_only_masked_padding = unit.ad_inpaint_only_masked_padding
 
     # Remove Hires prompt and Hires negative prompt params for i2i
-    del p.extra_generation_params['Hires prompt']
-    del p.extra_generation_params['Hires negative prompt']
+    if 'Hires prompt' in p.extra_generation_params:
+        del p.extra_generation_params['Hires prompt']
+    if 'Hires negative prompt' in p.extra_generation_params:
+        del p.extra_generation_params['Hires negative prompt']
 
     i2i = StableDiffusionProcessingImg2Img()
 

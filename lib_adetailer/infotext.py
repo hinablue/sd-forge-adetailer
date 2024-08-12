@@ -15,7 +15,7 @@ def field_to_displaytext(fieldname: str) -> str:
     return " ".join([word.capitalize() for word in fieldname.split("_")])
 
 def displaytext_to_field(text: str) -> str:
-    return "_".join([word.lower() for word in text.split(" ")])
+    return "_".join([word.lower() for word in text.strip().split(" ")]).replace('ad_', '')
 
 def parse_value(value: str) -> Union[str, float, int, bool]:
     if value in ("True", "False"):
@@ -48,7 +48,8 @@ def parse_unit(text: str) -> ADetailerUnit:
         enabled=True,
         **{
             displaytext_to_field(key): parse_value(value)
-            for (key, value) in (text.split(","),)
+            for item in text.split(",")
+            for (key, value) in (item.strip().split(":"),)
         },
     )
 

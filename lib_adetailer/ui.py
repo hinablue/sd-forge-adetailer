@@ -162,12 +162,12 @@ class ADetailerUiGroup(object):
                     elem_id=f"{elemid_prefix}model_classes-{n}",
                 )
 
-                self.ad_model.change(
-                    self.on_ad_model_update,
-                    inputs=self.ad_model,
-                    outputs=self.ad_model_classes,
-                    queue=False,
-                )
+                # self.ad_model.change(
+                #     self.on_ad_model_update,
+                #     inputs=self.ad_model,
+                #     outputs=self.ad_model_classes,
+                #     queue=False,
+                # )
 
         gr.HTML("<br>")
 
@@ -328,12 +328,12 @@ class ADetailerUiGroup(object):
                                 visible=True,
                                 elem_id=f"{elemid_prefix}inpaint_only_masked_padding-{n}",
                             )
-                            self.ad_inpaint_only_masked.change(
-                                self.gr_interactive,
-                                inputs=self.ad_inpaint_only_masked,
-                                outputs=self.ad_inpaint_only_masked_padding,
-                                queue=False,
-                            )
+                            # self.ad_inpaint_only_masked.change(
+                            #     self.gr_interactive,
+                            #     inputs=self.ad_inpaint_only_masked,
+                            #     outputs=self.ad_inpaint_only_masked_padding,
+                            #     queue=False,
+                            # )
 
                         with gr.Column(variant="compact"):
                             self.ad_use_separate_width_height = gr.Checkbox(
@@ -363,12 +363,12 @@ class ADetailerUiGroup(object):
                                 elem_id=f"{elemid_prefix}inpaint_height-{n}",
                             )
 
-                            self.ad_use_separate_width_height.change(
-                                lambda value: (self.gr_interactive(value)),
-                                inputs=self.ad_use_separate_width_height,
-                                outputs=[self.ad_inpaint_width, self.ad_inpaint_height],
-                                queue=False,
-                            )
+                            # self.ad_use_separate_width_height.change(
+                            #     lambda value: (self.gr_interactive(value)),
+                            #     inputs=self.ad_use_separate_width_height,
+                            #     outputs=[self.ad_inpaint_width, self.ad_inpaint_height],
+                            #     queue=False,
+                            # )
 
                     with gr.Row():
                         with gr.Column(variant="compact"):
@@ -389,12 +389,12 @@ class ADetailerUiGroup(object):
                                 elem_id=f"{elemid_prefix}steps-{n}",
                             )
 
-                            self.ad_use_separate_steps.change(
-                                self.gr_interactive,
-                                inputs=self.ad_use_separate_steps,
-                                outputs=self.ad_steps,
-                                queue=False,
-                            )
+                            # self.ad_use_separate_steps.change(
+                            #     self.gr_interactive,
+                            #     inputs=self.ad_use_separate_steps,
+                            #     outputs=self.ad_steps,
+                            #     queue=False,
+                            # )
 
                         with gr.Column(variant="compact"):
                             self.ad_use_separate_cfg_scale = gr.Checkbox(
@@ -414,12 +414,12 @@ class ADetailerUiGroup(object):
                                 elem_id=f"{elemid_prefix}cfg_scale-{n}",
                             )
 
-                            self.ad_use_separate_cfg_scale.change(
-                                self.gr_interactive,
-                                inputs=self.ad_use_separate_cfg_scale,
-                                outputs=self.ad_cfg_scale,
-                                queue=False,
-                            )
+                            # self.ad_use_separate_cfg_scale.change(
+                            #     self.gr_interactive,
+                            #     inputs=self.ad_use_separate_cfg_scale,
+                            #     outputs=self.ad_cfg_scale,
+                            #     queue=False,
+                            # )
 
                     with gr.Row():
                         with gr.Column(variant="compact"):
@@ -475,12 +475,12 @@ class ADetailerUiGroup(object):
                                 elem_id=f"{elemid_prefix}sampler-{n}",
                             )
 
-                            self.ad_use_separate_sampler.change(
-                                self.gr_interactive,
-                                inputs=self.ad_use_separate_sampler,
-                                outputs=self.ad_sampler,
-                                queue=False,
-                            )
+                            # self.ad_use_separate_sampler.change(
+                            #     self.gr_interactive,
+                            #     inputs=self.ad_use_separate_sampler,
+                            #     outputs=self.ad_sampler,
+                            #     queue=False,
+                            # )
 
                         with gr.Column(variant="compact"):
                             self.ad_use_separate_scheduler = gr.Checkbox(
@@ -498,12 +498,12 @@ class ADetailerUiGroup(object):
                                 elem_id=f"{elemid_prefix}scheduler-{n}",
                             )
 
-                            self.ad_use_separate_scheduler.change(
-                                self.gr_interactive,
-                                inputs=self.ad_use_separate_scheduler,
-                                outputs=self.ad_scheduler,
-                                queue=False,
-                            )
+                            # self.ad_use_separate_scheduler.change(
+                            #     self.gr_interactive,
+                            #     inputs=self.ad_use_separate_scheduler,
+                            #     outputs=self.ad_scheduler,
+                            #     queue=False,
+                            # )
 
                     with gr.Row():
                         with gr.Column(variant="compact"):
@@ -524,12 +524,12 @@ class ADetailerUiGroup(object):
                                 elem_id=f"{elemid_prefix}noise_multiplier-{n}",
                             )
 
-                            self.ad_use_separate_noise_multiplier.change(
-                                self.gr_interactive,
-                                inputs=self.ad_use_separate_noise_multiplier,
-                                outputs=self.ad_noise_multiplier,
-                                queue=False,
-                            )
+                            # self.ad_use_separate_noise_multiplier.change(
+                            #     self.gr_interactive,
+                            #     inputs=self.ad_use_separate_noise_multiplier,
+                            #     outputs=self.ad_noise_multiplier,
+                            #     queue=False,
+                            # )
 
                         with gr.Column(variant="compact"):
                             self.ad_use_separate_clip_skip = gr.Checkbox(
@@ -549,12 +549,12 @@ class ADetailerUiGroup(object):
                                 elem_id=f"{elemid_prefix}clip_skip-{n}",
                             )
 
-                            self.ad_use_separate_clip_skip.change(
-                                self.gr_interactive,
-                                inputs=self.ad_use_separate_clip_skip,
-                                outputs=self.ad_clip_skip,
-                                queue=False,
-                            )
+                            # self.ad_use_separate_clip_skip.change(
+                            #     self.gr_interactive,
+                            #     inputs=self.ad_use_separate_clip_skip,
+                            #     outputs=self.ad_clip_skip,
+                            #     queue=False,
+                            # )
 
                     with gr.Row(), gr.Column(variant="compact"):
                         self.ad_use_restore_face_after_adetailer = gr.Checkbox(
@@ -594,12 +594,12 @@ class ADetailerUiGroup(object):
                             elem_id=f"{elemid_prefix}controlnet_weight-{n}",
                         )
 
-                        self.ad_controlnet_model.change(
-                            self.on_cn_model_update,
-                            inputs=self.ad_controlnet_model,
-                            outputs=self.ad_controlnet_module,
-                            queue=False,
-                        )
+                        # self.ad_controlnet_model.change(
+                        #     self.on_cn_model_update,
+                        #     inputs=self.ad_controlnet_model,
+                        #     outputs=self.ad_controlnet_module,
+                        #     queue=False,
+                        # )
 
                     with gr.Column(variant="compact"):
                         self.ad_controlnet_guidance_start = gr.Slider(
