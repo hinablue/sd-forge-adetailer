@@ -36,9 +36,6 @@ def serialize_unit(unit: ADetailerUnit) -> str:
         if getattr(unit, field) != -1
         # Note: exclude hidden slider values.
     }
-    if not all("," not in str(v) and ":" not in str(v) for v in log_value.values()):
-        logger.error(f"Unexpected tokens encountered:\n{log_value}")
-        return ""
 
     return ", ".join(f"{field}: {value}" for field, value in log_value.items())
 
