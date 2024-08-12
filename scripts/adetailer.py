@@ -98,11 +98,6 @@ class ADetailerScript(scripts.Script):
 
         logger.info(f"Start processing.")
 
-        for i, unit in enumerate(enabled_units):
-            params = unit.extra_params(suffix=f" {i}")
-            params["ADetailer version"] = __version__
-            p.extra_generation_params.update(params)
-
         params_txt_content = Path(paths.data_path, "params.txt").read_text("utf-8")
 
         pp.image = ensure_rgb_image(pp.image)
@@ -118,7 +113,8 @@ class ADetailerScript(scripts.Script):
                 p, init_image, condition="ad_save_images_before", suffix="-ad-before"
             )
 
-        write_params_txt(params_txt_content)
+        Infotext.write_infotext(enabled_units, p)
+        Infotext.write_params_txt(params_txt_content)
 
 script_callbacks.on_ui_settings(on_ui_settings)
 script_callbacks.on_after_component(on_after_component)

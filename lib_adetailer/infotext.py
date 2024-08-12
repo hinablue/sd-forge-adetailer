@@ -3,6 +3,7 @@ from typing import List, Tuple, Union
 import os
 import gradio as gr
 
+from modules import paths
 from modules.processing import StableDiffusionProcessing, StableDiffusionProcessingImg2Img
 
 from lib_adetailer.logger import logger_adetailer as logger
@@ -47,8 +48,7 @@ def parse_unit(text: str) -> ADetailerUnit:
         enabled=True,
         **{
             displaytext_to_field(key): parse_value(value)
-            for item in text.split(",")
-            for (key, value) in (item.strip().split(": "),)
+            for (key, value) in (text.split(","),)
         },
     )
 
@@ -78,33 +78,29 @@ class Infotext(object):
             {
                 Infotext.unit_prefix(i): serialize_unit(unit)
                 for i, unit in enumerate(units)
-                if unit.enabled
+                if unit.ad_enabled
             }
         )
 
     @staticmethod
-    def update_infotext(p: StableDiffusionProcessing, unit: ADetailerUnit):
-        if p.extra_generation_params is not None:
-            p.extra_generation_params["ADetailer"] = unit.get_dict(isinstance(p, StableDiffusionProcessingImg2Img))
-
-    @staticmethod
     def write_params_txt(info: str):
-        with open(os.path.join(data_path, "params.txt"), "w", encoding="utf8") as file:
+        with open(os.path.join(paths.data_path, "params.txt"), "w", encoding="utf8") as file:
             file.write(info)
 
     @staticmethod
     def on_infotext_pasted(infotext, results):
+        updates = {}
         for k, v in results.items():
             if not k.startswith("ADetailer"):
                 continue
 
             assert isinstance(v, str), f"Expected string but got {v}."
             try:
-                for items in v.split(', '):
-                    field, value = items.split(': ')
-                    results[f"ADetailer {field}"] = value
-                results.pop("ADetailer")
+                for field, value in vars(parse_unit(v)).items():
+                    component_locator = f"{k} {field}"
+                    updates[component_locator] = value
             except Exception as e:
                 logger.warn(f"Failed to parse infotext value:\n{v}")
                 logger.warn(f"Exception: {e}")
             break
+        results.update(updates)

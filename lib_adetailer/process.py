@@ -150,49 +150,15 @@ def afterdetailer_process_image(n: int, unit: ADetailerUnit, p, pp, *args):
     del p.extra_generation_params['Hires prompt']
     del p.extra_generation_params['Hires negative prompt']
 
-    i2i = StableDiffusionProcessingImg2Img(
-        init_images=[pp.image],
-        resize_mode=0,
-        denoising_strength=denoising_strength,
-        mask=None,
-        mask_blur=unit.ad_inpaint_mask_blur,
-        inpainting_fill=1,
-        inpaint_full_res=inpaint_only_masked,
-        inpaint_full_res_padding=inpaint_only_masked_padding,
-        inpainting_mask_invert=0,
-        initial_noise_multiplier=noise_multiplier,
-        sd_model=p.sd_model,
-        outpath_samples=p.outpath_samples,
-        outpath_grids=p.outpath_grids,
-        prompt="",
-        negative_prompt="",
-        styles=p.styles,
-        seed=seed,
-        subseed=subseed,
-        subseed_strength=p.subseed_strength,
-        seed_resize_from_h=p.seed_resize_from_h,
-        seed_resize_from_w=p.seed_resize_from_w,
-        sampler_name=sampler_name,
-        scheduler=scheduler_name,
-        batch_size=1,
-        n_iter=1,
-        steps=steps,
-        cfg_scale=cfg_scale,
-        width=width,
-        height=height,
-        restore_faces=unit.ad_use_restore_face_after_adetailer,
-        tiling=p.tiling,
-        extra_generation_params={},
-        do_not_save_samples=True,
-        do_not_save_grid=True,
-        override_settings=override_settings,
-    )
+    i2i = StableDiffusionProcessingImg2Img()
 
     i2i.cached_c = [None, None, None]
     i2i.cached_uc = [None, None, None]
     i2i.scripts, i2i.script_args = script_filter(p, unit)
 
     # Override parameters AGAIN.
+    i2i.init_images = [pp.image]
+    i2i.resize_mode = 0
     i2i.denoising_strength = denoising_strength
     i2i.mask = None
     i2i.mask_blur = unit.ad_inpaint_mask_blur
@@ -221,7 +187,7 @@ def afterdetailer_process_image(n: int, unit: ADetailerUnit, p, pp, *args):
     i2i.height = height
     i2i.restore_faces = unit.ad_use_restore_face_after_adetailer
     i2i.tiling = p.tiling
-    i2i.extra_generation_params = {}
+    i2i.extra_generation_params = p.extra_generation_params
     i2i.do_not_save_samples = True
     i2i.do_not_save_grid = True
     i2i.override_settings = override_settings
@@ -258,21 +224,20 @@ def afterdetailer_process_image(n: int, unit: ADetailerUnit, p, pp, *args):
             resize_mode=external_code.resize_mode_from_value(i2i.resize_mode),
         )
 
+        cn = ControlNetUnit()
+        cn.enabled = True
+        cn.image = cnet_image
+        cn.model = unit.ad_controlnet_model
+        cn.module = unit.ad_controlnet_module
+        cn.weight = unit.ad_controlnet_weight
+        cn.guidance_start = unit.ad_controlnet_guidance_start
+        cn.guidance_end = unit.ad_controlnet_guidance_end
+        cn.processor_res = pres
+
         add_forge_script_to_adetailer_run(
             i2i,
             "ControlNet",
-            [
-                ControlNetUnit(
-                    enabled=True,
-                    image=cnet_image,
-                    model=unit.ad_controlnet_model,
-                    module=unit.ad_controlnet_module,
-                    weight=unit.ad_controlnet_weight,
-                    guidance_start=unit.ad_controlnet_guidance_start,
-                    guidance_end=unit.ad_controlnet_guidance_end,
-                    processor_res=pres,
-                )
-            ],
+            [cn],
         )
 
     elif unit.ad_controlnet_model == "None":
@@ -374,10 +339,6 @@ def save_image(p, image, *, condition: str, suffix: str) -> None:
         save_prompt = p.prompt
 
     if opts.data.get(condition, False):
-        infotext = create_infotext(
-            p, p.all_prompts, p.all_seeds, p.all_subseeds, None, 0, 0
-        )
-
         images.save_image(
             image=image,
             path=p.outpath_samples,
@@ -385,7 +346,6 @@ def save_image(p, image, *, condition: str, suffix: str) -> None:
             seed=p.seed,
             prompt=save_prompt,
             extension=opts.samples_format,
-            info=infotext,
             p=p,
             suffix=suffix,
         )
