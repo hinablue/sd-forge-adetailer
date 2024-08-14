@@ -226,20 +226,21 @@ def afterdetailer_process_image(n: int, unit: ADetailerUnit, p, pp, *args):
             resize_mode=external_code.resize_mode_from_value(i2i.resize_mode),
         )
 
-        cn = ControlNetUnit()
-        cn.enabled = True
-        cn.image = cnet_image
-        cn.model = unit.ad_controlnet_model
-        cn.module = unit.ad_controlnet_module
-        cn.weight = unit.ad_controlnet_weight
-        cn.guidance_start = unit.ad_controlnet_guidance_start
-        cn.guidance_end = unit.ad_controlnet_guidance_end
-        cn.processor_res = pres
-
         add_forge_script_to_adetailer_run(
             i2i,
             "ControlNet",
-            [cn],
+            [
+                ControlNetUnit(
+                    enabled=True,
+                    image=cnet_image,
+                    model=unit.ad_controlnet_model,
+                    module=unit.ad_controlnet_module,
+                    weight=unit.ad_controlnet_weight,
+                    guidance_start=unit.ad_controlnet_guidance_start,
+                    guidance_end=unit.ad_controlnet_guidance_end,
+                    processor_res=pres,
+                )
+            ],
         )
 
     elif unit.ad_controlnet_model == "None":

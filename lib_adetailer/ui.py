@@ -594,12 +594,12 @@ class ADetailerUiGroup(object):
                             elem_id=f"{elemid_prefix}controlnet_weight-{n}",
                         )
 
-                        # self.ad_controlnet_model.change(
-                        #     self.on_cn_model_update,
-                        #     inputs=self.ad_controlnet_model,
-                        #     outputs=self.ad_controlnet_module,
-                        #     queue=False,
-                        # )
+                        self.ad_controlnet_model.change(
+                            self.on_cn_model_update,
+                            inputs=self.ad_controlnet_model,
+                            outputs=self.ad_controlnet_module,
+                            queue=False,
+                        )
 
                     with gr.Column(variant="compact"):
                         self.ad_controlnet_guidance_start = gr.Slider(

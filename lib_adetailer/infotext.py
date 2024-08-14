@@ -18,6 +18,8 @@ def displaytext_to_field(text: str) -> str:
     return "_".join([word.lower() for word in text.strip().split(" ")]).replace('ad_', '')
 
 def parse_value(value: str) -> Union[str, float, int, bool]:
+    value = value.strip()
+
     if value in ("True", "False"):
         return value == "True"
     try:
