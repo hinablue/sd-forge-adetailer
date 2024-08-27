@@ -39,8 +39,15 @@ def serialize_unit(unit: ADetailerUnit) -> str:
         # Note: exclude hidden slider values.
     }
 
-    return ", ".join(f"{field}: {value}" for field, value in log_value.items())
+    # return ", ".join(f"{field}: {value}" for field, value in log_value.items())
 
+    result = []
+    for field, value in log_value.items():
+        if (field == "Ad Prompt" or field == "Ad Negative Prompt"):
+            result.append(f"{field}: '{value}'")
+        else:
+            result.append(f"{field}: {value}")
+    return ", ".join(result)
 
 def parse_unit(text: str) -> ADetailerUnit:
     # Special action for prompt and negative prompt
@@ -50,9 +57,22 @@ def parse_unit(text: str) -> ADetailerUnit:
     negative_prompt = end_part[0]
     end_part = ','.join(end_part[1:])
 
+    prompt = prompt.strip().replace("\n", '')
+    negative_prompt = negative_prompt.strip().replace("\n", '')
+
+    if prompt.startswith('"'):
+        prompt = prompt[1:]
+    if prompt.endswith('"'):
+        prompt = prompt[:-1]
+
+    if negative_prompt.startswith('"'):
+        negative_prompt = negative_prompt[1:]
+    if negative_prompt.endswith('"'):
+        negative_prompt = negative_prompt[:-1]
+
     return ADetailerUnit(
-        prompt=prompt.strip(),
-        negative_prompt=negative_prompt.strip(),
+        prompt=prompt,
+        negative_prompt=negative_prompt,
         **{
             displaytext_to_field(key): parse_value(value)
             for item in first_part.split(",")
