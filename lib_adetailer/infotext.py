@@ -10,7 +10,6 @@ from lib_adetailer.logger import logger_adetailer as logger
 
 from lib_adetailer.args import ADetailerUnit
 
-
 def field_to_displaytext(fieldname: str) -> str:
     return " ".join([word.capitalize() for word in fieldname.split("_")])
 
@@ -29,7 +28,6 @@ def parse_value(value: str) -> Union[str, float, int, bool]:
             return float(value)
         except ValueError:
             return value  # Plain string.
-
 
 def serialize_unit(unit: ADetailerUnit) -> str:
     log_value = {
@@ -60,15 +58,23 @@ def parse_unit(text: str) -> ADetailerUnit:
     prompt = prompt.strip().replace("\n", '')
     negative_prompt = negative_prompt.strip().replace("\n", '')
 
-    if prompt.startswith('"'):
-        prompt = prompt[1:]
     if prompt.endswith('"'):
         prompt = prompt[:-1]
+    if prompt.startswith('"'):
+        prompt = prompt[1:]
+    if prompt.endswith("'"):
+        prompt = prompt[:-1]
+    if prompt.startswith("'"):
+        prompt = prompt[1:]
 
-    if negative_prompt.startswith('"'):
-        negative_prompt = negative_prompt[1:]
     if negative_prompt.endswith('"'):
         negative_prompt = negative_prompt[:-1]
+    if negative_prompt.startswith('"'):
+        negative_prompt = negative_prompt[1:]
+    if negative_prompt.endswith("'"):
+        negative_prompt = negative_prompt[:-1]
+    if negative_prompt.startswith("'"):
+        negative_prompt = negative_prompt[1:]
 
     return ADetailerUnit(
         prompt=prompt,
