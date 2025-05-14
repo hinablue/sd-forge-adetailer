@@ -98,13 +98,9 @@ class ADetailerScript(scripts.Script):
 
         logger.info(f"Start processing.")
 
-        """
-        For torch >= 2.6, we need to set the environment variable
-        TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1
-        to avoid the error:
-        RuntimeError: Error loading weights from 'C:\Users\user\AppData\Local\comfyui\models\adetailer\adetailer_v2.safetensors'
-        The file is encrypted or corrupted.
-        """
+        # For torch >= 2.6, we need to set the environment variable
+        # TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1
+
         _weight_only_load = os.getenv("TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD")
         if _weight_only_load is None:
             os.environ["TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD"] = "1"
