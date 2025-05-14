@@ -48,7 +48,7 @@ def install():
         ("mediapipe", "0.10.10", None),
         ("rich", "13.7.1", None),
         # mediapipe
-        ("protobuf", "3.20", "3.9999"),
+        ("protobuf", "3.20", None),
     ]
 
     for pkg, low, high in deps:
